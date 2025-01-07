@@ -19,12 +19,23 @@ pub fn main() !void {
 
     rl.setTargetFPS(60);
 
+    const font = rl.loadFont("fonts/BigBlue_TerminalPlus.ttf");
+    defer rl.unloadFont(font);
+
     while (!rl.windowShouldClose()) {
         rl.beginDrawing();
         defer rl.endDrawing();
 
-        rl.clearBackground(rl.Color.black);
+        const screenWidth = rl.getScreenWidth();
+        const screenHeight = rl.getScreenHeight();
+        const text = "Hello, World!";
+        const textSize = rl.measureTextEx(font, text, 20.0, 2.0);
+        const middle = rl.Vector2{
+            .x = @as(f32, @floatFromInt(@divTrunc(screenWidth, 2))) - (textSize.x / 2.0),
+            .y = @as(f32, @floatFromInt(@divTrunc(screenHeight, 2))) - (textSize.y / 2.0),
+        };
 
-        rl.drawText("Hello, zig!", 200, 200, 20, rl.Color.white);
+        rl.clearBackground(rl.Color.black);
+        rl.drawTextEx(font, text, middle, 20.0, 2.0, rl.Color.white);
     }
 }
