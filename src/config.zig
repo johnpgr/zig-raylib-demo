@@ -60,7 +60,7 @@ pub const Config = struct {
             }
             if (std.mem.eql(u8, cmd, "Rectangle")) {
                 const rect = shapes.Rectangle{
-                    .name = try allocator.dupe(u8, tokens.next().?),
+                    .name = try allocator.dupeZ(u8, tokens.next().?),
                     .pos = rl.Vector2{
                         .x = try std.fmt.parseFloat(f32, tokens.next().?),
                         .y = try std.fmt.parseFloat(f32, tokens.next().?),
@@ -72,12 +72,13 @@ pub const Config = struct {
                     .color = rl.Color{ .r = try std.fmt.parseInt(u8, tokens.next().?, 10), .g = try std.fmt.parseInt(u8, tokens.next().?, 10), .b = try std.fmt.parseInt(u8, tokens.next().?, 10), .a = 255 },
                     .width = @floatFromInt(try std.fmt.parseInt(i32, tokens.next().?, 10)),
                     .height = @floatFromInt(try std.fmt.parseInt(i32, tokens.next().?, 10)),
+                    .shouldDraw = true,
                 };
                 try config.rectangles.append(rect);
             }
             if (std.mem.eql(u8, cmd, "Circle")) {
                 const circle = shapes.Circle{
-                    .name = try allocator.dupe(u8, tokens.next().?),
+                    .name = try allocator.dupeZ(u8, tokens.next().?),
                     .pos = rl.Vector2{
                         .x = try std.fmt.parseFloat(f32, tokens.next().?),
                         .y = try std.fmt.parseFloat(f32, tokens.next().?),
@@ -93,6 +94,7 @@ pub const Config = struct {
                         .a = 255,
                     },
                     .radius = @floatFromInt(try std.fmt.parseInt(i32, tokens.next().?, 10)),
+                    .shouldDraw = true,
                 };
                 try config.circles.append(circle);
             }

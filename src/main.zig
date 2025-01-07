@@ -16,13 +16,32 @@ pub fn updateRectangle(rect: *shapes.Rectangle, wWidth: i32, wHeight: i32) void 
     }
 }
 
-pub fn drawRectangle(rect: *shapes.Rectangle) void {
+pub fn drawRectangle(rect: *shapes.Rectangle, font: rl.Font, fontSize: i32) void {
+    if (!rect.shouldDraw) {
+        return;
+    }
+
     rl.drawRectangle(
         @intFromFloat(rect.pos.x),
         @intFromFloat(rect.pos.y),
         @intFromFloat(rect.width),
         @intFromFloat(rect.height),
         rect.color,
+    );
+
+    const textSize = rl.measureTextEx(font, @ptrCast(rect.name), @floatFromInt(fontSize), 0.0);
+    const textPos = rl.Vector2{
+        .x = rect.pos.x + (rect.width - textSize.x) / 2,
+        .y = rect.pos.y + (rect.height - textSize.y) / 2,
+    };
+
+    rl.drawTextEx(
+        font,
+        rect.name,
+        textPos,
+        @floatFromInt(fontSize),
+        0.0,
+        rl.Color.white,
     );
 }
 
@@ -39,14 +58,34 @@ pub fn updateCircle(circle: *shapes.Circle, wWidth: i32, wHeight: i32) void {
     }
 }
 
-pub fn drawCircle(circle: *shapes.Circle) void {
+pub fn drawCircle(circle: *shapes.Circle, font: rl.Font, fontSize: i32) void {
+    if (!circle.shouldDraw) {
+        return;
+    }
+
     rl.drawCircle(
         @intFromFloat(circle.pos.x),
         @intFromFloat(circle.pos.y),
         circle.radius,
         circle.color,
     );
+
+    const textSize = rl.measureTextEx(font, @ptrCast(circle.name), @floatFromInt(fontSize), 0.0);
+    const textPos = rl.Vector2{
+        .x = circle.pos.x - textSize.x / 2,
+        .y = circle.pos.y - textSize.y / 2,
+    };
+
+    rl.drawTextEx(
+        font,
+        circle.name,
+        textPos,
+        @floatFromInt(fontSize),
+        0.0,
+        rl.Color.white,
+    );
 }
+
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
@@ -75,12 +114,12 @@ pub fn main() !void {
 
         for (config.rectangles.items) |*rect| {
             updateRectangle(rect, wWidth, wHeight);
-            drawRectangle(rect);
+            drawRectangle(rect, font, config.font.size);
         }
 
         for (config.circles.items) |*circle| {
             updateCircle(circle, wWidth, wHeight);
-            drawCircle(circle);
+            drawCircle(circle, font, config.font.size);
         }
     }
 }
