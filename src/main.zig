@@ -1,41 +1,86 @@
 const std = @import("std");
 const rl = @import("raylib");
+const shapes = @import("shapes.zig");
+const Config = @import("config.zig").Config;
 
-const WIDTH = 800;
-const HEIGHT = 600;
+pub fn updateRectangle(rect: *shapes.Rectangle, wWidth: i32, wHeight: i32) void {
+    rect.pos.x += rect.speed.x;
+    rect.pos.y += rect.speed.y;
 
-pub const Game = struct {
-    const Self = @This();
-};
+    if (rect.pos.x < 0 or rect.pos.x + rect.width > @as(f32, @floatFromInt(wWidth))) {
+        rect.speed.x *= -1; // reverse horizontal direction
+    }
 
-pub fn frame() !void {}
+    if (rect.pos.y < 0 or rect.pos.y + rect.height > @as(f32, @floatFromInt(wHeight))) {
+        rect.speed.y *= -1; // reverse vertical direction
+    }
+}
+
+pub fn drawRectangle(rect: *shapes.Rectangle) void {
+    rl.drawRectangle(
+        @intFromFloat(rect.pos.x),
+        @intFromFloat(rect.pos.y),
+        @intFromFloat(rect.width),
+        @intFromFloat(rect.height),
+        rect.color,
+    );
+}
+
+pub fn updateCircle(circle: *shapes.Circle, wWidth: i32, wHeight: i32) void {
+    circle.pos.x += circle.speed.x;
+    circle.pos.y += circle.speed.y;
+
+    if (circle.pos.x - circle.radius < 0 or circle.pos.x + circle.radius > @as(f32, @floatFromInt(wWidth))) {
+        circle.speed.x *= -1; // reverse horizontal direction
+    }
+
+    if (circle.pos.y - circle.radius < 0 or circle.pos.y + circle.radius > @as(f32, @floatFromInt(wHeight))) {
+        circle.speed.y *= -1; // reverse vertical direction
+    }
+}
+
+pub fn drawCircle(circle: *shapes.Circle) void {
+    rl.drawCircle(
+        @intFromFloat(circle.pos.x),
+        @intFromFloat(circle.pos.y),
+        circle.radius,
+        circle.color,
+    );
+}
 
 pub fn main() !void {
-    rl.setConfigFlags(rl.ConfigFlags{
-        .window_resizable = false,
-    });
-    rl.initWindow(WIDTH, HEIGHT, "Zig gaming");
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer _ = gpa.deinit();
+    const allocator = gpa.allocator();
+
+    const config = Config.init(allocator, "config/config.txt") catch unreachable;
+    defer config.deinit(allocator);
+
+    rl.initWindow(config.windowWidth, config.windowHeight, "Zig gaming");
     defer rl.closeWindow();
 
     rl.setTargetFPS(60);
 
-    const font = rl.loadFont("fonts/BigBlue_TerminalPlus.ttf");
+    const font = rl.loadFont(config.font.path);
     defer rl.unloadFont(font);
 
     while (!rl.windowShouldClose()) {
+        const wWidth = rl.getScreenWidth();
+        const wHeight = rl.getScreenHeight();
+
         rl.beginDrawing();
         defer rl.endDrawing();
 
-        const screenWidth = rl.getScreenWidth();
-        const screenHeight = rl.getScreenHeight();
-        const text = "Hello, World!";
-        const textSize = rl.measureTextEx(font, text, 20.0, 2.0);
-        const middle = rl.Vector2{
-            .x = @as(f32, @floatFromInt(@divTrunc(screenWidth, 2))) - (textSize.x / 2.0),
-            .y = @as(f32, @floatFromInt(@divTrunc(screenHeight, 2))) - (textSize.y / 2.0),
-        };
-
         rl.clearBackground(rl.Color.black);
-        rl.drawTextEx(font, text, middle, 20.0, 2.0, rl.Color.white);
+
+        for (config.rectangles.items) |*rect| {
+            updateRectangle(rect, wWidth, wHeight);
+            drawRectangle(rect);
+        }
+
+        for (config.circles.items) |*circle| {
+            updateCircle(circle, wWidth, wHeight);
+            drawCircle(circle);
+        }
     }
 }
