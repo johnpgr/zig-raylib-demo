@@ -1,0 +1,6 @@
+Window(width int, height int)
+Font(name string, size int, r int, g int, b int)
+# x, y -> initial position; sx, sy -> initial speed
+Rectangle(name string, x f32, x f32, sx f32, sy f32, r int, g int, b int, w int, h int)
+# x, y -> initial position; sx, sy -> initial speed
+Circle(name string, x f32, y f32, sx f32, sy f32, r int, g int, b int, radius int)
